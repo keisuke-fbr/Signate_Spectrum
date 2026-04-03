@@ -1,1 +1,8 @@
 venv
+
+# データファイル
+data/*.csv
+data/*.tsv
+data/*.xlsx
+data/*.zip
+data/*.tar.gz
