@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ':*)",
+      "Bash(python -c ':*)",
+      "Bash(python:*)",
+      "WebFetch(domain:user.competition.signate.jp)"
+    ]
+  }
+}
