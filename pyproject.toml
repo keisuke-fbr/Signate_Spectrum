@@ -1,0 +1,8 @@
+[project]
+name = "signate-spectrum"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "pandas>=3.0.2",
+]
