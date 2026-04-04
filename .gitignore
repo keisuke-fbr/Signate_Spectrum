@@ -6,3 +6,5 @@ data/*.tsv
 data/*.xlsx
 data/*.zip
 data/*.tar.gz
+*.png
+catboost_info/
