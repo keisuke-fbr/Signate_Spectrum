@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__executeCode",
+      "Bash(python -c ':*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(mkdir -p \"C:\\\\Users\\\\keisu\\\\Desktop\\\\Competition\\\\Signate_Spectrum\\\\.claude\\\\skills\\\\signate-spectrum\\\\references\")",
+      "Bash(cp -r ~/.claude/skills/signate-spectrum/. \"C:\\\\Users\\\\keisu\\\\Desktop\\\\Competition\\\\Signate_Spectrum\\\\.claude\\\\skills\\\\signate-spectrum/\")",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:code.visualstudio.com)",
+      "Bash(python -c \"import torch; print\\('torch:', torch.__version__\\)\")",
+      "Bash(python -c \"import optuna; print\\('optuna:', optuna.__version__\\)\")",
+      "Bash(python -c \"import sklearn; print\\('sklearn:', sklearn.__version__\\)\")",
+      "Bash(python -c \"import tensorflow; print\\('tf:', tensorflow.__version__\\)\")",
+      "Bash(python -c \"import keras; print\\('keras:', keras.__version__\\)\")",
+      "Bash(python:*)"
+    ]
+  }
+}
