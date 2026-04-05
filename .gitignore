@@ -8,3 +8,4 @@ data/*.zip
 data/*.tar.gz
 *.png
 catboost_info/
+trash/
