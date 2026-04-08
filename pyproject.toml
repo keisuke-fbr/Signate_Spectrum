@@ -1,7 +1,8 @@
 [project]
 name = "signate-spectrum"
 version = "0.1.0"
-requires-python = ">=3.13"
+# grid-wmと同じ3.12系に指定
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "catboost>=1.2.10",
     "ipykernel>=7.2.0",
@@ -12,4 +13,16 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "tqdm>=4.67.3",
+    "torch==2.5.1",      # バージョンを grid-wm に合わせる
+    "torchvision==0.20.1", # torch 2.5.1 に対応するバージョン
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+# torch関連を cu121 サイトから取るように強制
+torch = { index = "pytorch-cu121" }
+torchvision = { index = "pytorch-cu121" }
