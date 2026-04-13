@@ -1,0 +1,36 @@
+[
+  {
+    "timestamp": "2026-04-09 20:50:33",
+    "settings": {
+      "A_WEIGHTED_KNN": false,
+      "B_D2_KNN": false,
+      "C_KNN_DISTANCE": false,
+      "D_HIGHER_LGB_W": false,
+      "E_DROP_RIDGE": false,
+      "F_BAND_AREA": false
+    },
+    "weights": {
+      "LGB": 0.7,
+      "PLS": 0.15,
+      "Ridge": 0.15
+    },
+    "oof_rmse": {
+      "LGB": 17.820155073526763,
+      "PLS": 15.009339762922808,
+      "Ridge": 20.6326210298277,
+      "Blend": 15.163837546431619
+    },
+    "fold_rmses": [
+      9.984825699653355,
+      18.25738937564438,
+      17.422945545635077,
+      14.047543490555979,
+      15.772575812202039
+    ],
+    "fold_mean": 15.097055984738166,
+    "fold_std": 2.9356488683643915,
+    "submission_file": "submission_ab_test.csv",
+    "lgb_input_dim": 3123,
+    "LB_score": null
+  }
+]
