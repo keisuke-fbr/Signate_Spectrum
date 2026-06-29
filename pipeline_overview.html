@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>パイプライン概要 - Signate Spectrum</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Hiragino Sans', sans-serif; background: #f5f6fa; color: #2d3436; line-height: 1.6; }
+
+  header {
+    background: linear-gradient(135deg, #2d3436, #636e72);
+    color: white;
+    padding: 36px 40px;
+  }
+  header h1 { font-size: 1.55rem; font-weight: 700; }
+  header p  { margin-top: 8px; color: #b2bec3; font-size: 0.88rem; }
+
+  nav {
+    background: white;
+    border-bottom: 1px solid #dfe6e9;
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  nav a {
+    display: block;
+    padding: 14px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #636e72;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+  }
+  nav a:hover { color: #2d3436; border-bottom-color: #dfe6e9; }
+  nav a.active { color: #0984e3; border-bottom-color: #0984e3; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 40px 24px 60px; }
+
+  /* section */
+  .section { margin-bottom: 48px; scroll-margin-top: 56px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .section-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 1.2rem; font-weight: 700; }
+  .section-subtitle { font-size: 0.83rem; color: #636e72; margin-top: 2px; }
+
+  /* color themes */
+  .theme-prep    { --accent: #00b894; --light: #d5f5e3; --text: #1e8449; }
+  .theme-feat    { --accent: #0984e3; --light: #d6eaf8; --text: #1a5276; }
+  .theme-model   { --accent: #6c5ce7; --light: #ede7f6; --text: #4527a0; }
+  .theme-search  { --accent: #e17055; --light: #fdebd0; --text: #784212; }
+  .theme-eval    { --accent: #fdcb6e; --light: #fef9e7; --text: #7d6608; }
+  .theme-other   { --accent: #636e72; --light: #f1f2f6; --text: #2d3436; }
+
+  .section-icon  { background: var(--light); color: var(--accent); }
+  .section-title { color: var(--text); }
+
+  /* card */
+  .card {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-left: 4px solid var(--accent);
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+  }
+  .card-head:hover { background: #fafbfc; }
+  .card-title { font-size: 0.97rem; font-weight: 700; flex: 1; }
+  .card-badge {
+    font-size: 0.7rem;
+    padding: 2px 9px;
+    border-radius: 10px;
+    background: var(--light);
+    color: var(--text);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .chevron { color: #b2bec3; font-size: 0.9rem; transition: transform 0.2s; }
+  .card.open .chevron { transform: rotate(90deg); }
+  .card-body { display: none; padding: 0 20px 20px; border-top: 1px solid #f1f2f6; }
+  .card.open .card-body { display: block; }
+
+  /* content elements */
+  p { font-size: 0.9rem; color: #4a4a4a; margin-top: 12px; }
+  ul, ol { padding-left: 20px; margin-top: 8px; }
+  li { font-size: 0.88rem; margin-top: 5px; line-height: 1.65; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .kv {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px 13px;
+  }
+  .kv-key { font-size: 0.82rem; font-weight: 700; color: #2d3436; margin-bottom: 2px; }
+  .kv-val { font-size: 0.8rem; color: #636e72; }
+
+  code {
+    background: #f1f2f6;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.84em;
+    color: #e17055;
+  }
+
+  .note {
+    margin-top: 12px;
+    background: #fff8e1;
+    border-left: 4px solid #fdcb6e;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 0.86rem;
+    color: #5d4037;
+    line-height: 1.6;
+  }
+  .note strong { color: #e67e22; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  @media (max-width: 580px) { .two-col { grid-template-columns: 1fr; } }
+
+  .sub-card {
+    border: 1px solid #dfe6e9;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .sub-card h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+  .sub-card ul { padding-left: 16px; }
+  .sub-card li { font-size: 0.84rem; color: #636e72; margin-top: 4px; }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 14px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+  .flow-box {
+    background: var(--light);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .flow-arrow { color: #b2bec3; font-size: 1rem; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.86rem; }
+  th { background: #f1f2f6; text-align: left; padding: 8px 12px; font-weight: 700; color: #636e72; border-bottom: 2px solid #dfe6e9; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f1f2f6; }
+  tr:last-child td { border-bottom: none; }
+
+  footer { text-align: center; padding: 24px; color: #b2bec3; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>パイプライン概要 — Signate Spectrum（木材含水率推定）</h1>
+  <p>NIR スペクトルデータから含水率を推定するモデルの全処理をカテゴリ別にまとめたドキュメント</p>
+</header>
+
+<nav id="nav">
+  <a href="#prep"   class="active">データ前処理</a>
+  <a href="#feat"   >特徴量エンジニアリング</a>
+  <a href="#model"  >使用モデル</a>
+  <a href="#search" >パラメータ探索</a>
+  <a href="#eval"   >評価方法</a>
+  <a href="#other"  >その他</a>
+</nav>
+
+<div class="container">
+
+<!-- ================================================================
+     1. データの前処理
+================================================================ -->
+<section class="section theme-prep" id="prep">
+  <div class="section-header">
+    <div class="section-icon">⚙️</div>
+    <div>
+      <div class="section-title">データの前処理</div>
+      <div class="section-subtitle">生データをモデルに入力できる形に整える処理</div>
+    </div>
+  </div>
+
+  <!-- 外れ値除去 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">ベイスギの除外</span>
+      <span class="card-badge">サンプル除去</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>学習データからベイスギのサンプルをすべて除外します。</p>
+      <div class="note">
+        <strong>理由：</strong>テストデータにベイスギが含まれていないため、学習させても汎化に貢献せず、逆に樹種固有のパターンを過学習するリスクがあります。
+      </div>
+    </div>
+  </div>
+
+  <!-- ターゲット変換 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">ターゲット変数の対数変換</span>
+      <span class="card-badge">変換</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>含水率に <code>log1p</code> を適用してから学習し、予測時に <code>expm1</code> で元に戻します。</p>
+      <ul>
+        <li>含水率は 0〜300% 近くまで右に裾が長い分布</li>
+        <li>対数変換で分布を圧縮し、大きな値による損失への影響を抑制</li>
+        <li>RMSE の計算には元のスケールに戻した値を使用</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SNV -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">SNV（Standard Normal Variate）</span>
+      <span class="card-badge">スペクトル正規化</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>各サンプルのスペクトルを <strong>平均0・標準偏差1</strong> に正規化します。</p>
+      <div class="flow">
+        <span class="flow-box">生スペクトル</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">各波長の平均を引く</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">標準偏差で割る</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">SNV 済みスペクトル</span>
+      </div>
+      <div class="note">
+        <strong>目的：</strong>光路長・粒径・密度のばらつきによる見かけ上の吸光度変動を除去します。異なる樹種間でスペクトル形状を比較可能にします。
+      </div>
+    </div>
+  </div>
+
+  <!-- 微分 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">Savitzky-Golay フィルタによる微分</span>
+      <span class="card-badge">微分変換</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>SNV 済みスペクトルに Savitzky-Golay フィルタを適用して <strong>1次微分・2次微分</strong> を計算します。</p>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">窓幅</div><div class="kv-val">15点</div></div>
+        <div class="kv"><div class="kv-key">多項式次数</div><div class="kv-val">2次</div></div>
+        <div class="kv"><div class="kv-key">1次微分の効果</div><div class="kv-val">ベースライン除去・ピーク位置の強調</div></div>
+        <div class="kv"><div class="kv-key">2次微分の効果</div><div class="kv-val">ピークの曲率・飽和状態の検出</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mixup -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">Cross-Species Mixup（データ拡張）</span>
+      <span class="card-badge">データ拡張</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>異なる樹種のサンプルを線形補間して <strong>仮想サンプルを生成</strong> し、訓練データに追加します。</p>
+      <div class="flow">
+        <span class="flow-box">樹種A のサンプル</span>
+        <span class="flow-arrow">×λ</span>
+        <span class="flow-box">樹種B のサンプル</span>
+        <span class="flow-arrow">×(1-λ)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">仮想サンプル</span>
+      </div>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">生成数</div><div class="kv-val">500 サンプル / フォールド</div></div>
+        <div class="kv"><div class="kv-key">λ の分布</div><div class="kv-val">Beta(0.3, 0.3)</div></div>
+        <div class="kv"><div class="kv-key">目的</div><div class="kv-val">未知樹種へのロバスト性向上</div></div>
+      </div>
+      <div class="note">
+        <strong>なぜ異なる樹種か：</strong>テストの樹種は学習に含まれない想定のため、樹種を跨いだ補間で「どんな樹種でも通用する含水率の特徴」を学ばせます。
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     2. 特徴量エンジニアリング
+================================================================ -->
+<section class="section theme-feat" id="feat">
+  <div class="section-header">
+    <div class="section-icon">🔬</div>
+    <div>
+      <div class="section-title">特徴量エンジニアリング</div>
+      <div class="section-subtitle">スペクトルから予測に有効な情報を抽出する</div>
+    </div>
+  </div>
+
+  <!-- PLS スコア -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">PLS スコア（次元圧縮）</span>
+      <span class="card-badge">次元圧縮</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>SNV 済みスペクトル（約1555次元）を PLS で圧縮してスコアとして使います。</p>
+      <div class="two-col">
+        <div class="sub-card">
+          <h4>ModelA で使用</h4>
+          <ul>
+            <li>5成分に圧縮</li>
+            <li>KNN の距離空間として使用</li>
+            <li>LGB の入力特徴量にも追加</li>
+          </ul>
+        </div>
+        <div class="sub-card">
+          <h4>ModelB で使用</h4>
+          <ul>
+            <li>2成分 or 4成分に圧縮</li>
+            <li>PLS 予測値も特徴量に追加</li>
+            <li>KNN はユークリッド距離</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">
+        <strong>PCA との違い：</strong>PCA は分散最大化、PLS はターゲット（含水率）との共分散を最大化して圧縮するため、予測に直結した成分が得られます。
+      </div>
+    </div>
+  </div>
+
+  <!-- KNN 特徴量 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">KNN 距離加重平均特徴量</span>
+      <span class="card-badge">近傍参照</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>PLS スコア空間で近傍 <strong>9 サンプル</strong> を探し、距離の逆数で重み付けした含水率の平均を特徴量にします。</p>
+      <div class="flow">
+        <span class="flow-box">PLS スコア空間</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">近傍 9 サンプル取得</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">距離加重平均</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">KNN 予測値</span>
+      </div>
+      <ul>
+        <li>「スペクトルが似ているサンプルは含水率も似ている」という仮定に基づく</li>
+        <li>学習データに含まれない樹種でも、近いスペクトルを参照できる</li>
+        <li>Mixup サンプルに対しては自分自身を除外して近傍を計算</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 物理特徴量 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">物理ベース特徴量（罠対策）</span>
+      <span class="card-badge">ドメイン知識</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>「樹種固有のパターンを暗記しない」ために、<strong>水の物理状態</strong> を直接反映する特徴量を設計しています。</p>
+      <table>
+        <tr><th>特徴量</th><th>計算方法</th><th>目的</th></tr>
+        <tr><td><code>w2_div_scatter</code></td><td>水帯2 ÷ 散乱帯</td><td>密度の影響を除いた純粋な水分信号</td></tr>
+        <tr><td><code>ws_div_pure_density</code></td><td>強水帯 ÷ 密度帯</td><td>密度正規化した水分強度</td></tr>
+        <tr><td><code>peak_wl_w2</code></td><td>水帯2のピーク波長</td><td>自由水・結合水の比率変化</td></tr>
+        <tr><td><code>abs1450_div_1940</code></td><td>1450nm ÷ 1940nm</td><td>吸光度飽和の指標（高含水率域）</td></tr>
+        <tr><td><code>weak_div_strong</code></td><td>弱水帯 ÷ 強水帯</td><td>飽和しにくい帯と飽和しやすい帯の比</td></tr>
+        <tr><td><code>cel_div_w2</code></td><td>セルロース帯 ÷ 水帯2</td><td>木材O-Hと水O-Hの分離</td></tr>
+        <tr><td><code>d1_w2_range</code></td><td>水帯2の1次微分幅</td><td>繊維飽和点前後のスペクトル変化</td></tr>
+        <tr><td><code>d2_w2_curvature_ratio</code></td><td>2次微分の曲率比</td><td>ピーク形状の非対称性</td></tr>
+        <tr><td><code>water_vs_skeleton_ratio</code></td><td>実水帯 ÷ 骨格帯</td><td>木材骨格に対する水の相対量</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     3. 使用モデル
+================================================================ -->
+<section class="section theme-model" id="model">
+  <div class="section-header">
+    <div class="section-icon">🤖</div>
+    <div>
+      <div class="section-title">使用モデル</div>
+      <div class="section-subtitle">3種類のモデルをアンサンブル（ブレンド）して提出</div>
+    </div>
+  </div>
+
+  <!-- ModelA -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">ModelA — LightGBM（シードアベレージング）</span>
+      <span class="card-badge">メインモデル</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>入力特徴量: <strong>PLS5成分スコア + KNN予測値 + 物理特徴量</strong></p>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">n_estimators</div><div class="kv-val">1500（早期終了あり）</div></div>
+        <div class="kv"><div class="kv-key">learning_rate</div><div class="kv-val">0.02</div></div>
+        <div class="kv"><div class="kv-key">max_depth / num_leaves</div><div class="kv-val">4 / 15（浅め）</div></div>
+        <div class="kv"><div class="kv-key">colsample_bytree</div><div class="kv-val">0.6</div></div>
+        <div class="kv"><div class="kv-key">reg_lambda</div><div class="kv-val">3.0（強め）</div></div>
+        <div class="kv"><div class="kv-key">シード</div><div class="kv-val">35, 42, 777 の3つ平均</div></div>
+      </div>
+      <div class="note">
+        <strong>シードアベレージング：</strong>同じ構造で乱数シードだけ変えた3モデルの予測を平均することで、ランダム性によるばらつきを低減します。
+      </div>
+    </div>
+  </div>
+
+  <!-- ModelB -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">ModelB — PLS 圧縮 + LightGBM</span>
+      <span class="card-badge">サブモデル</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>入力特徴量: <strong>PLS(2 or 4成分)スコア + PLS予測値 + KNN予測値 + 物理特徴量（一部）</strong></p>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">n_estimators</div><div class="kv-val">1000（早期終了あり）</div></div>
+        <div class="kv"><div class="kv-key">learning_rate</div><div class="kv-val">0.03</div></div>
+        <div class="kv"><div class="kv-key">max_depth / num_leaves</div><div class="kv-val">4 / 15</div></div>
+        <div class="kv"><div class="kv-key">colsample_bytree</div><div class="kv-val">0.8</div></div>
+        <div class="kv"><div class="kv-key">PLS 成分数</div><div class="kv-val">2成分 と 4成分 の2種</div></div>
+      </div>
+      <ul>
+        <li>ModelA より次元圧縮が強い → 過学習しにくいが情報量も少ない</li>
+        <li>ModelA と予測パターンが異なるためブレンドで相補的に機能</li>
+        <li>物理特徴量は交互作用系に絞ることで PLS 圧縮のメリットを維持</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 旧版 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">旧版 LGBM（比較用 / アンサンブル候補）</span>
+      <span class="card-badge">比較用</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>入力特徴量: <strong>PCA10成分スコア + KNN予測値 + 1940/1300nm比 + 散乱帯平均 + 全体標準偏差</strong></p>
+      <ul>
+        <li>PLS の代わりに PCA を使用（ターゲットとの共分散を考慮しない）</li>
+        <li>物理特徴量が少ない（罠対策なし）</li>
+        <li>正則化が弱め（<code>reg_lambda=0.5</code>）</li>
+      </ul>
+      <div class="note">
+        ブレンド探索で改善版と混ぜた方がスコアが良くなる場合もあるため、削除せず候補として保持しています。
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     4. パラメータ探索方法
+================================================================ -->
+<section class="section theme-search" id="search">
+  <div class="section-header">
+    <div class="section-icon">🔍</div>
+    <div>
+      <div class="section-title">パラメータ探索方法</div>
+      <div class="section-subtitle">モデルのハイパーパラメータとブレンド比率の決定方法</div>
+    </div>
+  </div>
+
+  <!-- 早期終了 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">早期終了（Early Stopping）</span>
+      <span class="card-badge">木の本数</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>LightGBM の木の本数（<code>n_estimators</code>）はグリッドサーチではなく、<strong>検証データのスコアが改善しなくなった時点で自動停止</strong> します。</p>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">ModelA の早期終了ラウンド</div><div class="kv-val">50 ラウンド</div></div>
+        <div class="kv"><div class="kv-key">ModelB の早期終了ラウンド</div><div class="kv-val">30 ラウンド</div></div>
+        <div class="kv"><div class="kv-key">検証データ</div><div class="kv-val">GroupKFold の val セット</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ブレンド比率 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">ブレンド比率のグリッドサーチ</span>
+      <span class="card-badge">アンサンブル</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>複数モデルの予測を重み付き平均するときの <strong>最適比率を 1% 刻みで全探索</strong> します。</p>
+      <div class="flow">
+        <span class="flow-box">A系モデル (2種)</span>
+        <span class="flow-arrow">×</span>
+        <span class="flow-box">B系モデル (2種)</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">重み 30%〜85% で全探索</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-box">OOF RMSE 最小を選択</span>
+      </div>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">探索範囲（A系の重み）</div><div class="kv-val">30% 〜 85%</div></div>
+        <div class="kv"><div class="kv-key">刻み幅</div><div class="kv-val">1%</div></div>
+        <div class="kv"><div class="kv-key">組み合わせ数</div><div class="kv-val">A系2種 × B系2種 × 55通り = 220通り</div></div>
+      </div>
+      <div class="note">
+        <strong>OOF 予測で探索する理由：</strong>テストデータのラベルは使えないため、訓練データの OOF 予測（モデルが見ていないデータへの予測）を代わりに使います。これによりリークなしで比率を最適化できます。
+      </div>
+    </div>
+  </div>
+
+  <!-- その他パラメータ -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">その他のハイパーパラメータについて</span>
+      <span class="card-badge">手動調整</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p><code>max_depth</code>・<code>num_leaves</code>・<code>reg_lambda</code> などの LGB パラメータは、<strong>過去の実験結果と Private LB の傾向</strong> をもとに手動で設定しています。</p>
+      <ul>
+        <li>木を浅くする（<code>num_leaves=15</code>）→ 樹種パターンへの過学習を防ぐ</li>
+        <li>正則化を強める（<code>reg_lambda=3.0</code>）→ Public→Private での精度悪化を防ぐ</li>
+        <li>PLS の成分数（2・4・5）→ 実験で OOF スコアを比較して選択</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     5. 評価方法
+================================================================ -->
+<section class="section theme-eval" id="eval">
+  <div class="section-header">
+    <div class="section-icon">📊</div>
+    <div>
+      <div class="section-title">評価方法</div>
+      <div class="section-subtitle">モデルの性能をどう測るか</div>
+    </div>
+  </div>
+
+  <!-- 指標 -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">評価指標 — RMSE</span>
+      <span class="card-badge">指標</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>コンペの評価指標は <strong>RMSE（Root Mean Squared Error）</strong> です。<br>
+      予測値と真値の差の二乗平均平方根で、単位が含水率（%）と同じになります。</p>
+      <div class="note">
+        学習時はターゲットを <code>log1p</code> 変換して学習しますが、RMSE の計算は <code>expm1</code> で元のスケールに戻してから行います。
+      </div>
+    </div>
+  </div>
+
+  <!-- GroupKFold -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">GroupKFold（樹種単位の交差検証）</span>
+      <span class="card-badge">検証戦略</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>通常の KFold ではなく、<strong>同じ樹種が train と val に混在しないように分割</strong> します。</p>
+      <div class="flow">
+        <span class="flow-box">fold1: val = 樹種A,B</span>
+        <span class="flow-arrow">|</span>
+        <span class="flow-box">fold2: val = 樹種C,D</span>
+        <span class="flow-arrow">|</span>
+        <span class="flow-box">fold3: val = 樹種E,F</span>
+        <span class="flow-arrow">…</span>
+      </div>
+      <div class="note">
+        <strong>なぜ重要か：</strong>テストデータの樹種は学習データにない想定のため、通常の KFold では「同じ樹種を見た後に予測する」という楽な問題になり、汎化性能を正しく評価できません。GroupKFold で <strong>未知樹種へのロバスト性</strong> をシミュレーションします。
+      </div>
+      <div class="grid">
+        <div class="kv"><div class="kv-key">分割数</div><div class="kv-val">5 フォールド</div></div>
+        <div class="kv"><div class="kv-key">グループ</div><div class="kv-val">species number（樹種番号）</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OOF -->
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">OOF（Out-Of-Fold）予測</span>
+      <span class="card-badge">予測集約</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>各フォールドで「そのフォールドの検証データ」への予測を貯め、<strong>全サンプルを1回ずつ予測した配列</strong> を作ります。</p>
+      <ul>
+        <li>全 1322 サンプルに対する OOF 予測が得られる</li>
+        <li>この OOF 予測で RMSE を計算 → モデルの汎化性能の指標になる</li>
+        <li>ブレンド比率の最適化にも OOF を使用（テストデータ不要）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     6. その他
+================================================================ -->
+<section class="section theme-other" id="other">
+  <div class="section-header">
+    <div class="section-icon">📁</div>
+    <div>
+      <div class="section-title">その他</div>
+      <div class="section-subtitle">出力・提出に関する処理</div>
+    </div>
+  </div>
+
+  <div class="card open">
+    <div class="card-head" onclick="toggle(this)">
+      <span class="card-title">提出ファイルの生成</span>
+      <span class="card-badge">出力</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <p>ブレンド探索で最良だった予測を <code>sample_submit.csv</code> のフォーマットに合わせて出力します。</p>
+      <ul>
+        <li>負の予測値を <code>clip(0, None)</code> で 0 以上に補正（含水率は 0 未満にならない）</li>
+        <li>出力ファイル名: <code>yamaguchi_final_robust.csv</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<footer>Signate Spectrum — パイプライン概要ドキュメント</footer>
+
+<script>
+  function toggle(head) {
+    head.parentElement.classList.toggle('open');
+  }
+
+  // nav highlight on scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>
